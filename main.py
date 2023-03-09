@@ -1,8 +1,6 @@
 import requests
 import json
 from pprint import pprint
-
- 
 # Open the sample JSON file
 # Using the open() function
 file = open("words_dictionary.json.txt", 'r')
@@ -18,10 +16,13 @@ print(type(json_data))
 # Iterate through the dictionary
 # And print the key: value pairs
 for key, value in json_data.items():
-    word = (f"\nKey: {key}")
+    word = (\n {key}")
     print (word)
- #insert ria code     
- 
+ #  set = {
+#      value,
+#      value, 
+#      vaue,
+#  }
 # Close the opened sample JSON file
 # Using close() function
 file.close()
