@@ -17,7 +17,12 @@ print(type(json_data))
 # And print the key: value pairs
 for key, value in json_data.items():
     word = f"{key}"
-    print(word)
+    url = "https://dictionaryapi.com/api/v3/references/collegiate/json/"+ word +"?key=207a976f-67d9-4375-b8fd-ce6c8ca3f5bc"
+    response = requests.get(url)
+    response.raise_for_status() # check for errors
+        # Load JSON data into a Python variable.
+    jsonData = json.loads(response.text)
+    pprint(jsonData)
  #  set = {
 #      value,
 #      value, 
@@ -26,4 +31,3 @@ for key, value in json_data.items():
 # Close the opened sample JSON file
 # Using close() function
 file.close()
-
