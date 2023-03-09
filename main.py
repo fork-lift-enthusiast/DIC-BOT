@@ -16,8 +16,8 @@ print(type(json_data))
 # Iterate through the dictionary
 # And print the key: value pairs
 for key, value in json_data.items():
-    word = (\n {key}")
-    print (word)
+    word = f"{key}"
+    print(word)
  #  set = {
 #      value,
 #      value, 
