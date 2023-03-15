@@ -4,7 +4,12 @@ from pprint import pprint
 # Open the sample JSON file
 # Using the open() function
 file = open("words_dictionary.json.txt", 'r')
- 
+ #add to text file 
+def AppendToFile(word, definition):
+    myFile = open("words_plus_definitions ","a") 
+    myFile.write(name + "definition: " +definition + "\n")
+    myFile.close()
+
 # Convert the JSON data into Python object
 # Here it is a dictionary
 json_data = json.load(file)
@@ -22,8 +27,17 @@ for key, value in json_data.items():
     response.raise_for_status() # check for errors
         # Load JSON data into a Python variable.
     jsonData = json.loads(response.text)
+    try:
+        definition = jsonData['shortdef'][0]
+    except (TypeError, KeyError):
+        print("could not read ")
+    # or substitute a placeholder, or raise a new exception, etc.
     pprint(jsonData)
- #  set = {
+    
+    #AppendToFile(word, definition)
+   
+    
+# set = {
 #      value,
 #      value, 
 #      vaue,
