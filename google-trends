@@ -1,1 +1,36 @@
+import json
+from pytrends.request import TrendReq
 
+# authentication credentials
+pytrends = TrendReq()
+
+# parse json file
+with open('words_dictionary.json') as f:
+    try:
+        data = json.load(f)
+        listed = list(data)
+    except ValueError as e:
+        print("Error parsing JSON file:", str(e))
+        exit()
+
+trends_data = {} 
+for i in range(0, len(listed), 5):
+    word_list = listed[i:i+5]
+    for word in word_list:
+        pytrends.build_payload([word], timeframe='today 5-y')
+        interest_over_time_df = pytrends.interest_over_time()
+        #no data
+        if interest_over_time_df.empty:
+            continue
+        # avg score 
+        average_score = interest_over_time_df[word].mean()
+        trends_data[word] = average_score
+        print(word, average_score)
+        
+    word_list.clear()
+
+# new dictionary for words score less than 10
+result = {word: score for word, score in trends_data.items() if score < 10}
+
+# print new dictionary
+print(result)
