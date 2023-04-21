@@ -1,115 +1,59 @@
-"""
 import requests
-import json
-from pprint import pprint
-<<<<<<< Updated upstream
-dictionary = open("words_dictionary.json.txt")
-print(type(dictionary))
-# for key in dictionary: 
-#     # word = key
-    
-    
-    
-#     print(key)
-'''
-# Call an API
-url = "https://dictionaryapi.com/api/v3/references/collegiate/json/"+ word +"?key=207a976f-67d9-4375-b8fd-ce6c8ca3f5bc"
-response = requests.get(url)
-response.raise_for_status() # check for errors
-# Load JSON data into a Python variable.
-jsonData = json.loads(response.text)
-pprint(jsonData)
-'''
-=======
-# Open the sample JSON file
-# Using the open() function
-file = open("words_dictionary.json.txt", 'r')
- 
-# Convert the JSON data into Python object
-# Here it is a dictionary
-json_data = json.load(file)
- 
-# Check the type of the Python object
-# Using type() function 
-print(type(json_data))
- 
-# Iterate through the dictionary
-# And print the key: value pairs
-for key, value in json_data.items():
-    word = f"{key}"
-    print(word)
- #  set = {
-#      value,
-#      value, 
-#      vaue,
-#  }
-# Close the opened sample JSON file
-# Using close() function
-file.close()
+from bs4 import BeautifulSoup
+import pandas as pd
 
-import requests
-proxy_servers = {
-    'http': 'http://proxy.sample.com:8080',
-    'https': 'http://secureproxy.sample.com:8080'
-}
-s = requests.Session()
-s.proxies = proxy_servers
-response = s.get('https://trends.google.com/home?geo=US')
-import pandas as pd 
-from pytrends.request import TrendReq
-pytrends = TrendReq(hl='en-US', tz=360)
-print("test")
+with open('words_dictionary.json.txt', 'r') as f:
+    words = f.read().split()
 
 
-words = ['melancholy']
-# payload
-pytrends.build_payload(words, cat=0, timeframe='today 12-m')
+from collections import Counter
+word_freq = Counter(words)
+sorted_words = sorted(word_freq.items(), key=lambda x: x[1])
 
 
-pytrends.build_payload(kw_list=['pizza', 'bagel'], timeframe=['2022-09-04 2022-09-10', '2022-09-18 2022-09-24'])
-print(pytrends.multirange_interest_over_time())
 
-"""
+#get request
+#parse html
+#get definition
+def get_def(word):
+    url = f'https://www.dictionary.com/browse/{[word]}'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    try: 
+        definition = soup.find(class_='one-click-content').get_text()
+    except AttributeError:
+        definition = ''
+    return definition
 
-import json
-from pytrends.request import TrendReq
+import tweepy 
+import time
+from datetime import datetime, timedelta
 
-# Set up the pytrends client with your authentication credentials
-pytrends = TrendReq()
+consumer_key = 'L7NZvehIdhcVLHiBYsdxjWAZE'
+consumer_secret = 'OLdo5xA8xLrvW8Ae2KDrQkZTSF3jeC9JH6Vjp9LJU4kvza3veC'
+access_token = '1491298012642963457-KaQteUiNbFKNIypiZ3ZoCHGInXM4n7'
+access_token_secret = 'Z1bqkN8oqG6BRiccyeXU4xw8SgAVRBNAMdpJgoalb2AFs'
 
-# Read the JSON file and parse it
-with open('words_dictionary.json.txt') as f:
-    try:
-        data = json.load(f)
-    except ValueError as e:
-        print("Error parsing JSON file:", str(e))
-        exit()
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
 
-# Extract all the words from the data
-words = []
-for item in data:
-    if not isinstance(item, dict):
-        print("Error: item is not a dictionary:", item)
-        continue
-    if 'words' not in item:
-        print("Error: 'words' key not found in item:", item)
-        continue
-    words.extend(item['words'])
+api = tweepy.API(auth)
 
-# Retrieve the trends data for each word
-trends_data = {}
-for word in words:
-    pytrends.build_payload([word], timeframe='today 5-y')
-    interest_over_time_df = pytrends.interest_over_time()
-    if interest_over_time_df.empty:
-        # No data available for the word
-        continue
-    # Calculate the average score for the word
-    average_score = interest_over_time_df[word].mean()
-    trends_data[word] = average_score
+def lmc():
+    while True:
+        for word, freq in sorted_words:
+            if freq ==1:
+                definition = get_def(word)
+                tweet = f'{word}: {definition}'
+                tweet_obj = {'text': tweet}
+                try:
+                    response = api.request('POST', 'statuses/update', {'status': tweet_obj})
 
-# Create a dictionary with words that have an average score less than 10
-result = {word: score for word, score in trends_data.items() if score < 10}
-
-# Print the resulting dictionary
-print(result)
+                except tweepy.TwitterServerError as error:
+                    print(f"Error sending tweet: {error}")
+                time.sleep(10)
+        now = datetime.now()
+        next_tweet_time = datetime(now.year, now.month, now.day, 9, 0, 0) if now.hour < 9 else datetime(now.year, now.month, now.day, 21, 0, 0)
+        time_to_wait = (next_tweet_time - now).total_seconds()
+        time.sleep(time_to_wait)
+lmc()    
