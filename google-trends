@@ -14,8 +14,8 @@ with open('words_dictionary.json') as f:
         exit()
 
 trends_data = {} 
-for i in range(0, len(listed), 5):
-    word_list = listed[i:i+5]
+for i in range(0, len(listed), 4):
+    word_list = listed[i:i+4]
     for word in word_list:
         pytrends.build_payload([word], timeframe='today 5-y')
         interest_over_time_df = pytrends.interest_over_time()

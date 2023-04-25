@@ -28,7 +28,8 @@ def get_def(word):
 import tweepy 
 import time
 from datetime import datetime, timedelta
-
+bearer_token = "AAAAAAAAAAAAAAAAAAAAAJnelQEAAAAAaWUofrq94VD%2B4ToqjcQ3Aal6ttA%3DlN7uWpxjAmT8YKRFbwd5eklKEWR2gygIdej5AT1buImqvDRNFx"
+headers = {"Authorization": f"Bearer {bearer_token}"}
 consumer_key = 'L7NZvehIdhcVLHiBYsdxjWAZE'
 consumer_secret = 'OLdo5xA8xLrvW8Ae2KDrQkZTSF3jeC9JH6Vjp9LJU4kvza3veC'
 access_token = '1491298012642963457-KaQteUiNbFKNIypiZ3ZoCHGInXM4n7'
@@ -39,6 +40,15 @@ auth.set_access_token(access_token, access_token_secret)
 
 api = tweepy.API(auth)
 
+
+def send_tweet(tweet):
+    url = "https://api.twitter.com/2/tweets"
+    data = {"text": tweet}
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code != 201:
+        raise Exception(f"Failed to send tweet: {response.status_code} {response.text}")
+    return response.json()
+
 def lmc():
     while True:
         for word, freq in sorted_words:
@@ -47,7 +57,8 @@ def lmc():
                 tweet = f'{word}: {definition}'
                 tweet_obj = {'text': tweet}
                 try:
-                    response = api.request('POST', 'statuses/update', {'status': tweet_obj})
+                    response = api.request('POST', 'statuses/update', params={'status': tweet_obj})
+
 
                 except tweepy.TwitterServerError as error:
                     print(f"Error sending tweet: {error}")
